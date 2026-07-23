@@ -1,2 +1,0 @@
-# Script-Hub-Soloxiz
-neeee
