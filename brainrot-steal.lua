@@ -35,7 +35,7 @@ local Colors = {
     Background2   = Color3.fromRGB(22, 20, 24),
     Element       = Color3.fromRGB(36, 32, 39),
     ElementHover  = Color3.fromRGB(46, 42, 49),
-    Accent        = Color3.fromRGB(232, 186, 248),  -- roxo Solix
+    Accent        = Color3.fromRGB(232, 186, 248),
     Accent2       = Color3.fromRGB(150, 100, 230),
     Text          = Color3.fromRGB(255, 255, 255),
     TextDim       = Color3.fromRGB(185, 185, 185),
@@ -79,11 +79,7 @@ local function makeDraggable(frame, handle)
 end
 local function notify(title, desc, duration)
     pcall(function()
-        if Remotes and Remotes:FindFirstChild("Notification") then
-            Remotes.Notification:FireServer("[" .. title .. "] " .. desc, "140072726814802")
-        else
-            game.StarterGui:SetCore("SendNotification", {Title = title, Text = desc, Duration = duration or 3})
-        end
+        game.StarterGui:SetCore("SendNotification", {Title = title, Text = desc, Duration = duration or 3})
     end)
 end
 
@@ -159,15 +155,6 @@ MainFrame.Parent = ScreenGui
 Corner(MainFrame, 12)
 Stroke(MainFrame, Colors.Border, 1.5)
 
--- Gradiente
-local BgGrad = Instance.new("UIGradient")
-BgGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 22, 30)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 6, 12))
-})
-BgGrad.Rotation = 45
-BgGrad.Parent = MainFrame
-
 -- ============================
 -- TOP BAR
 -- ============================
@@ -179,15 +166,6 @@ TopBar.BorderSizePixel = 0
 TopBar.ZIndex = 10
 TopBar.Parent = MainFrame
 Corner(TopBar, 12)
-
-local TopBarFill = Instance.new("Frame")
-TopBarFill.Size = UDim2.new(1, 0, 0, 12)
-TopBarFill.Position = UDim2.new(0, 0, 1, -12)
-TopBarFill.BackgroundColor3 = Colors.Background2
-TopBarFill.BackgroundTransparency = 0.20
-TopBarFill.BorderSizePixel = 0
-TopBarFill.ZIndex = 9
-TopBarFill.Parent = TopBar
 
 local LogoLine = Instance.new("Frame")
 LogoLine.Size = UDim2.new(0, 4, 0, 26)
@@ -214,7 +192,7 @@ local Version = Instance.new("TextLabel")
 Version.Size = UDim2.new(0, 200, 1, 0)
 Version.Position = UDim2.new(0, 165, 0, 0)
 Version.BackgroundTransparency = 1
-Version.Text = "v1.0  -  by Mavis"
+Version.Text = "v1.0"
 Version.TextColor3 = Colors.TextDim
 Version.TextSize = 12
 Version.Font = Enum.Font.Gotham
@@ -294,7 +272,7 @@ ContentArea.ZIndex = 7
 ContentArea.Parent = MainFrame
 
 -- ============================
--- SISTEMA DE ABAS (com scroll custom)
+-- SISTEMA DE ABAS
 -- ============================
 local Tabs = {}
 local CurrentTab = nil
@@ -316,7 +294,6 @@ local function CreateTab(name, order)
     TabButton.Parent = Sidebar
     Corner(TabButton, 6)
 
-    -- Container com scroll custom
     local Container = Instance.new("Frame")
     Container.Name = name .. "Container"
     Container.Size = UDim2.new(1, 0, 1, 0)
@@ -357,17 +334,11 @@ local function CreateTab(name, order)
     Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateCanvas)
     task.defer(updateCanvas)
 
-    local function scrollBy(amt)
-        local max = math.max(0, TabContent.AbsoluteCanvasSize.Y - TabContent.AbsoluteSize.Y)
-        TabContent.CanvasPosition = Vector2.new(0, math.clamp(TabContent.CanvasPosition.Y.Offset + amt, 0, max))
-    end
-
     Tabs[name] = {
         Button = TabButton,
         Container = Container,
         Content = TabContent,
         Layout = Layout,
-        ScrollBy = scrollBy,
     }
 
     TabButton.MouseButton1Click:Connect(function()
@@ -440,20 +411,6 @@ local function CreateSectionLabel(parent, text)
     Lbl.Parent = Section
 end
 
-local function CreateInfoLabel(parent, text, color)
-    local Lbl = Instance.new("TextLabel")
-    Lbl.Size = UDim2.new(1, 0, 0, 20)
-    Lbl.BackgroundTransparency = 1
-    Lbl.Text = text
-    Lbl.TextColor3 = color or Colors.TextDim
-    Lbl.TextSize = 12
-    Lbl.Font = Enum.Font.Gotham
-    Lbl.TextXAlignment = Enum.TextXAlignment.Left
-    Lbl.ZIndex = 9
-    Lbl.Parent = parent
-    return Lbl
-end
-
 local function CreateButton(parent, text, callback, color)
     local Btn = Instance.new("TextButton")
     Btn.Size = UDim2.new(1, 0, 0, 36)
@@ -484,89 +441,15 @@ local function CreateButton(parent, text, callback, color)
     return Btn
 end
 
-local function CreateSecondaryButton(parent, text, callback)
-    return CreateButton(parent, text, callback, Colors.Element)
-end
-
--- Input numerico + botao "DEFINIR"
-local function CreateAmountInput(parent, label, defaultValue, onSet)
-    local Row = Instance.new("Frame")
-    Row.Size = UDim2.new(1, 0, 0, 40)
-    Row.BackgroundColor3 = Colors.Element
-    Row.BackgroundTransparency = 0.40
-    Row.BorderSizePixel = 0
-    Row.ZIndex = 9
-    Row.Parent = parent
-    Corner(Row, 6)
-    Stroke(Row, Colors.Border, 1)
-
-    local Lbl = Instance.new("TextLabel")
-    Lbl.Size = UDim2.new(0, 130, 1, 0)
-    Lbl.Position = UDim2.new(0, 12, 0, 0)
-    Lbl.BackgroundTransparency = 1
-    Lbl.Text = label
-    Lbl.TextColor3 = Colors.Text
-    Lbl.TextSize = 12
-    Lbl.Font = Enum.Font.Gotham
-    Lbl.TextXAlignment = Enum.TextXAlignment.Left
-    Lbl.ZIndex = 10
-    Lbl.Parent = Row
-
-    local Input = Instance.new("TextBox")
-    Input.Size = UDim2.new(0, 110, 0, 26)
-    Input.Position = UDim2.new(0, 140, 0.5, -13)
-    Input.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
-    Input.BorderSizePixel = 0
-    Input.Text = tostring(defaultValue)
-    Input.PlaceholderText = "Numero"
-    Input.TextColor3 = Colors.Accent
-    Input.TextSize = 13
-    Input.Font = Enum.Font.GothamBold
-    Input.ClearTextOnFocus = false
-    Input.ZIndex = 10
-    Input.Parent = Row
-    Corner(Input, 4)
-
-    local Btn = Instance.new("TextButton")
-    Btn.Size = UDim2.new(0, 80, 0, 26)
-    Btn.Position = UDim2.new(1, -90, 0.5, -13)
-    Btn.BackgroundColor3 = Colors.Success
-    Btn.BackgroundTransparency = 0.15
-    Btn.Text = "DEFINIR"
-    Btn.TextColor3 = Colors.Text
-    Btn.TextSize = 11
-    Btn.Font = Enum.Font.GothamBold
-    Btn.BorderSizePixel = 0
-    Btn.ZIndex = 10
-    Btn.Parent = Row
-    Corner(Btn, 4)
-
-    Btn.MouseButton1Click:Connect(function()
-        local v = tonumber(Input.Text)
-        if not v then
-            notify("Erro", "Digite um numero valido", 2)
-            return
-        end
-        v = math.floor(v)
-        if v < -1e9 then v = -1e9 end
-        if v > 1e9 then v = 1e9 end
-        if onSet then pcall(onSet, v) end
-    end)
-
-    return Row
-end
-
 -- ============================
 -- ABAS
 -- ============================
 local MoneyTab   = CreateTab("Money",   1)
 local StatsTab   = CreateTab("Stats",   2)
-local UpgradeTab = CreateTab("Upgrade", 3)
-local SpawnTab   = CreateTab("Spawns",  4)
-local EventsTab  = CreateTab("Events",  5)
-local RoletaTab  = CreateTab("Roletas", 6)
-local AdminTab   = CreateTab("Admin",   7)
-local MiscTab    = CreateTab("Misc",    8)
+local SpawnTab   = CreateTab("Spawns",  3)
+local EventsTab  = CreateTab("Events",  4)
+local AdminTab   = CreateTab("Admin",   5)
+local MiscTab    = CreateTab("Misc",    6)
 
 Tabs["Money"].Container.Visible = true
 Tabs["Money"].Button.BackgroundColor3 = Colors.Accent
@@ -577,61 +460,20 @@ CurrentTab = "Money"
 -- ============================
 -- ABA: MONEY
 -- ============================
-CreateSectionLabel(MoneyTab, "Adicionar ao saldo (quantidade customizavel)")
-
-CreateAmountInput(MoneyTab, "Dinheiro", 1000000, function(v)
-    if Remotes:FindFirstChild("UpdateLeaderstatsAdicionar") then
-        Remotes.UpdateLeaderstatsAdicionar:FireServer(LocalPlayer.Name, "Dinheiro", v)
-        notify("Money", "+" .. tostring(v) .. " Dinheiro", 2)
-    end
-end)
-CreateAmountInput(MoneyTab, "Moedas", 999999, function(v)
-    if Remotes:FindFirstChild("UpdateLeaderstatsAdicionar") then
-        Remotes.UpdateLeaderstatsAdicionar:FireServer(LocalPlayer.Name, "Moedas", v)
-        notify("Money", "+" .. tostring(v) .. " Moedas", 2)
-    end
-end)
-CreateAmountInput(MoneyTab, "Tokens", 999999, function(v)
-    if Remotes:FindFirstChild("UpdateLeaderstatsAdicionar") then
-        Remotes.UpdateLeaderstatsAdicionar:FireServer(LocalPlayer.Name, "Tokens", v)
-        notify("Money", "+" .. tostring(v) .. " Tokens", 2)
-    end
-end)
-
-CreateSectionLabel(MoneyTab, "Definir valor exato (set, nao soma)")
-CreateAmountInput(MoneyTab, "Set Dinheiro", 999999999, function(v)
-    if Remotes:FindFirstChild("UpdateLeaderstats") then
-        Remotes.UpdateLeaderstats:FireServer(LocalPlayer.Name, "Dinheiro", v)
-        notify("Set", "Dinheiro = " .. tostring(v), 2)
-    end
-end)
-CreateAmountInput(MoneyTab, "Set Moedas", 999999, function(v)
-    if Remotes:FindFirstChild("UpdateLeaderstats") then
-        Remotes.UpdateLeaderstats:FireServer(LocalPlayer.Name, "Moedas", v)
-        notify("Set", "Moedas = " .. tostring(v), 2)
-    end
-end)
-CreateAmountInput(MoneyTab, "Set Tokens", 999999, function(v)
-    if Remotes:FindFirstChild("UpdateLeaderstats") then
-        Remotes.UpdateLeaderstats:FireServer(LocalPlayer.Name, "Tokens", v)
-        notify("Set", "Tokens = " .. tostring(v), 2)
-    end
-end)
-
-CreateSectionLabel(MoneyTab, "Max shortcuts (1 bilhao)")
-CreateButton(MoneyTab, "+1B Dinheiro (instantaneo)", function()
+CreateSectionLabel(MoneyTab, "Money Management")
+CreateButton(MoneyTab, "+1B Dinheiro", function()
     if Remotes:FindFirstChild("UpdateLeaderstatsAdicionar") then
         Remotes.UpdateLeaderstatsAdicionar:FireServer(LocalPlayer.Name, "Dinheiro", 1e9)
         notify("Money", "+1B Dinheiro!", 2)
     end
 end, Colors.Gold)
-CreateButton(MoneyTab, "+1B Moedas (instantaneo)", function()
+CreateButton(MoneyTab, "+1B Moedas", function()
     if Remotes:FindFirstChild("UpdateLeaderstatsAdicionar") then
         Remotes.UpdateLeaderstatsAdicionar:FireServer(LocalPlayer.Name, "Moedas", 1e9)
         notify("Money", "+1B Moedas!", 2)
     end
 end, Colors.Gold)
-CreateButton(MoneyTab, "+1B Tokens (instantaneo)", function()
+CreateButton(MoneyTab, "+1B Tokens", function()
     if Remotes:FindFirstChild("UpdateLeaderstatsAdicionar") then
         Remotes.UpdateLeaderstatsAdicionar:FireServer(LocalPlayer.Name, "Tokens", 1e9)
         notify("Money", "+1B Tokens!", 2)
@@ -641,40 +483,14 @@ end, Colors.Gold)
 -- ============================
 -- ABA: STATS
 -- ============================
-CreateSectionLabel(StatsTab, "Stats do jogador (valor customizavel)")
-CreateAmountInput(StatsTab, "Velocidade", 999999, function(v)
-    if Remotes:FindFirstChild("UpdateLeaderstats") then
-        Remotes.UpdateLeaderstats:FireServer(LocalPlayer.Name, "Velocidade", v)
-        notify("Stats", "Velocidade = " .. tostring(v), 2)
-    end
-end)
-CreateAmountInput(StatsTab, "Rebirth", 999, function(v)
-    if Remotes:FindFirstChild("UpdateLeaderstats") then
-        Remotes.UpdateLeaderstats:FireServer(LocalPlayer.Name, "Rebirth", v)
-        notify("Stats", "Rebirth = " .. tostring(v), 2)
-    end
-end)
-CreateAmountInput(StatsTab, "Nivel", 999, function(v)
-    if Remotes:FindFirstChild("UpdateLeaderstats") then
-        Remotes.UpdateLeaderstats:FireServer(LocalPlayer.Name, "Nivel", v)
-        notify("Stats", "Nivel = " .. tostring(v), 2)
-    end
-end)
-CreateAmountInput(StatsTab, "XP", 999999, function(v)
-    if Remotes:FindFirstChild("UpdateLeaderstats") then
-        Remotes.UpdateLeaderstats:FireServer(LocalPlayer.Name, "XP", v)
-        notify("Stats", "XP = " .. tostring(v), 2)
-    end
-end)
-
-CreateSectionLabel(StatsTab, "Max Stats")
-CreateButton(StatsTab, "Set VELOCIDADE MAX (1B)", function()
+CreateSectionLabel(StatsTab, "Aumentar Stats")
+CreateButton(StatsTab, "Velocidade MAX (1B)", function()
     if Remotes:FindFirstChild("UpdateLeaderstats") then
         Remotes.UpdateLeaderstats:FireServer(LocalPlayer.Name, "Velocidade", 1e9)
         notify("Stats", "Velocidade = 1B", 2)
     end
 end, Colors.Gold)
-CreateButton(StatsTab, "Set REBIRTH MAX (999)", function()
+CreateButton(StatsTab, "Rebirth MAX (999)", function()
     if Remotes:FindFirstChild("UpdateLeaderstats") then
         Remotes.UpdateLeaderstats:FireServer(LocalPlayer.Name, "Rebirth", 999)
         notify("Stats", "Rebirth = 999", 2)
@@ -682,291 +498,39 @@ CreateButton(StatsTab, "Set REBIRTH MAX (999)", function()
 end, Colors.Gold)
 
 -- ============================
--- ABA: UPGRADE
--- ============================
-CreateSectionLabel(UpgradeTab, "Upgrade gratis (config customizada)")
-CreateInfoLabel(UpgradeTab, "Config completa: Velocidade, Custo, MultiplicadorCusto", Colors.TextDim)
-
-CreateButton(UpgradeTab, "Upgrade GRATIS Max", function()
-    if Remotes:FindFirstChild("UpgradeBuy") then
-        Remotes.UpgradeBuy:FireServer({Velocidade = 999, Custo = 0, MultiplicadorCusto = 1})
-        notify("Upgrade", "Upgrade gratis max aplicado!", 2)
-    end
-end, Colors.Success)
-CreateButton(UpgradeTab, "Upgrade Velocidade 9999", function()
-    if Remotes:FindFirstChild("UpgradeBuy") then
-        Remotes.UpgradeBuy:FireServer({Velocidade = 9999, Custo = 0, MultiplicadorCusto = 1})
-        notify("Upgrade", "+9999 velocidade", 2)
-    end
-end, Colors.Success)
-
-CreateSectionLabel(UpgradeTab, "Rebirth gratis")
-CreateButton(UpgradeTab, "Rebirth Gratis (2 tiers)", function()
-    if Remotes:FindFirstChild("Rebirth") then
-        local cfg = {[1] = {Custo = 0, DinheiroMulti = 999}, [2] = {Custo = 0, DinheiroMulti = 9999}}
-        Remotes.Rebirth:FireServer(cfg, false)
-        notify("Rebirth", "Rebirth gratis aplicado!", 2)
-    end
-end, Colors.Success)
-CreateButton(UpgradeTab, "Rebirth Gratis (5 tiers max)", function()
-    if Remotes:FindFirstChild("Rebirth") then
-        local cfg = {}
-        for i = 1, 5 do
-            cfg[i] = {Custo = 0, DinheiroMulti = 99999}
-        end
-        Remotes.Rebirth:FireServer(cfg, false)
-        notify("Rebirth", "Rebirth 5 tiers gratis!", 2)
-    end
-end, Colors.Success)
-
--- ============================
 -- ABA: SPAWNS
 -- ============================
-CreateSectionLabel(SpawnTab, "Spawnar Brainrot (digite o nome)")
-
--- Input + botao Spawn
-local SpawnRow = Instance.new("Frame")
-SpawnRow.Size = UDim2.new(1, 0, 0, 40)
-SpawnRow.BackgroundColor3 = Colors.Element
-SpawnRow.BackgroundTransparency = 0.40
-SpawnRow.BorderSizePixel = 0
-SpawnRow.ZIndex = 9
-SpawnRow.Parent = SpawnTab
-Corner(SpawnRow, 6)
-Stroke(SpawnRow, Colors.Border, 1)
-
-local SpawnInput = Instance.new("TextBox")
-SpawnInput.Size = UDim2.new(1, -100, 0, 26)
-SpawnInput.Position = UDim2.new(0, 12, 0.5, -13)
-SpawnInput.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
-SpawnInput.BorderSizePixel = 0
-SpawnInput.Text = "Noob"
-SpawnInput.PlaceholderText = "Nome do brainrot (ex: Skibbidi)"
-SpawnInput.TextColor3 = Colors.Accent
-SpawnInput.TextSize = 13
-SpawnInput.Font = Enum.Font.GothamBold
-SpawnInput.ClearTextOnFocus = false
-SpawnInput.ZIndex = 10
-SpawnInput.Parent = SpawnRow
-Corner(SpawnInput, 4)
-
-local SpawnBtn = Instance.new("TextButton")
-SpawnBtn.Size = UDim2.new(0, 80, 0, 26)
-SpawnBtn.Position = UDim2.new(1, -90, 0.5, -13)
-SpawnBtn.BackgroundColor3 = Colors.Success
-SpawnBtn.BackgroundTransparency = 0.15
-SpawnBtn.Text = "SPAWN"
-SpawnBtn.TextColor3 = Colors.Text
-SpawnBtn.TextSize = 11
-SpawnBtn.Font = Enum.Font.GothamBold
-SpawnBtn.BorderSizePixel = 0
-SpawnBtn.ZIndex = 10
-SpawnBtn.Parent = SpawnRow
-Corner(SpawnBtn, 4)
-
-SpawnBtn.MouseButton1Click:Connect(function()
-    local name = SpawnInput.Text
-    if name == "" then notify("Erro", "Digite um nome", 2) return end
+CreateSectionLabel(SpawnTab, "Spawnar Brainrots")
+CreateButton(SpawnTab, "Spawn Noob", function()
     if Remotes:FindFirstChild("SpawnThing") then
-        Remotes.SpawnThing:FireServer(name, "Default", "Common")
-        notify("Spawn", name .. " spawnado!", 2)
+        Remotes.SpawnThing:FireServer("Noob", "Default", "Common")
+        notify("Spawn", "Noob spawnado!", 2)
     end
-end)
-
-CreateSectionLabel(SpawnTab, "Seletor de MUTACAO (clique pra mudar)")
-
--- Mutacoes (baseado nos prints)
-local Mutations = {
-    {name = "Default",    color = Color3.fromRGB(180, 180, 180)},
-    {name = "Diamante",   color = Color3.fromRGB(100, 200, 255)},
-    {name = "Esmeralda",  color = Color3.fromRGB(80, 230, 120)},
-    {name = "Gold",       color = Color3.fromRGB(255, 200, 50)},
-    {name = "Common",     color = Color3.fromRGB(120, 220, 100)},
-    {name = "UnCommon",   color = Color3.fromRGB(80, 180, 220)},
-    {name = "Rare",       color = Color3.fromRGB(80, 130, 255)},
-    {name = "Epic",       color = Color3.fromRGB(180, 80, 255)},
-    {name = "Legendary",  color = Color3.fromRGB(255, 180, 50)},
-    {name = "Mythic",     color = Color3.fromRGB(255, 60, 80)},
-    {name = "Secret",     color = Color3.fromRGB(255, 100, 200)},
-    {name = "Celestial",  color = Color3.fromRGB(180, 130, 255)},
-    {name = "Cosmic",     color = Color3.fromRGB(120, 80, 200)},
-    {name = "Divine",     color = Color3.fromRGB(255, 220, 80)},
-    {name = "Burger",     color = Color3.fromRGB(255, 140, 50)},
-}
-
-local SelectedMutation = "Default"
-
-local MutRow1 = Instance.new("Frame")
-MutRow1.Size = UDim2.new(1, 0, 0, 28)
-MutRow1.BackgroundTransparency = 1
-MutRow1.ZIndex = 9
-MutRow1.Parent = SpawnTab
-local MutRow1L = Instance.new("UIListLayout")
-MutRow1L.FillDirection = Enum.FillDirection.Horizontal
-MutRow1L.Padding = UDim.new(0, 3)
-MutRow1L.Parent = MutRow1
-
-local MutRow2 = Instance.new("Frame")
-MutRow2.Size = UDim2.new(1, 0, 0, 28)
-MutRow2.BackgroundTransparency = 1
-MutRow2.ZIndex = 9
-MutRow2.Parent = SpawnTab
-local MutRow2L = Instance.new("UIListLayout")
-MutRow2L.FillDirection = Enum.FillDirection.Horizontal
-MutRow2L.Padding = UDim.new(0, 3)
-MutRow2L.Parent = MutRow2
-
-local mutButtons = {}
-for i, m in ipairs(Mutations) do
-    local row = i <= 8 and MutRow1 or MutRow2
-    local b = Instance.new("TextButton")
-    b.Size = UDim2.new(0.125, -2, 1, 0)
-    b.BackgroundColor3 = m.color
-    b.BackgroundTransparency = m.name == SelectedMutation and 0 or 0.6
-    b.Text = m.name
-    b.TextColor3 = Colors.Text
-    b.TextSize = 10
-    b.Font = Enum.Font.GothamBold
-    b.BorderSizePixel = 0
-    b.AutoButtonColor = false
-    b.ZIndex = 10
-    b.Parent = row
-    Corner(b, 4)
-    mutButtons[m.name] = b
-
-    b.MouseButton1Click:Connect(function()
-        SelectedMutation = m.name
-        for n, btn in pairs(mutButtons) do
-            local mt = Mutations[0]
-            for _, mm in ipairs(Mutations) do
-                if mm.name == n then mt = mm; break end
-            end
-            btn.BackgroundTransparency = n == SelectedMutation and 0 or 0.6
-        end
-        notify("Mutacao", m.name, 1)
-    end)
-end
-
-CreateInfoLabel(SpawnTab, "Mutacao selecionada: " .. SelectedMutation, Colors.Accent)
-local MutInfo = CreateInfoLabel(SpawnTab, "Clique num brainrot abaixo pra spawnar com a mutacao", Colors.TextDim)
--- Atualiza label quando muda
-for i, m in ipairs(Mutations) do
-    local b = mutButtons[m.name]
-    b.MouseButton1Click:Connect(function()
-        if MutInfo and MutInfo.Parent then
-            local cm = Colors.Accent
-            for _, mm in ipairs(Mutations) do
-                if mm.name == SelectedMutation then cm = mm.color; break end
-            end
-            MutInfo.Text = "Mutacao: " .. SelectedMutation .. " | Clique num brainrot pra spawnar"
-            MutInfo.TextColor3 = cm
-        end
-    end)
-end
-
-CreateSectionLabel(SpawnTab, "Lista de Brainrots (28 paginas do jogo)")
-
--- Brainrots baseados nos prints do jogo
-local Brainrots = {
-    "Noob", "Bacon", "BaconGirl", "Common Lucky Block",
-    "DonateKingP", "UnCommon Lucky Block", "N1CO_2.0", "Rare Lucky Block",
-    "DuduBetero", "Builderman", "Secret Lucky Block", "LuanClashWar",
-    "mateusedgarDEV", "xMarcelo", "Celestial Lucky Block", "Los mateusedgarDEV",
-    "NoobSapiens", "TwinPlayz", "Los Noob", "Mythic Lucky Block",
-    "AlexKaboom", "Myster0y", "Cosmic Lucky Block", "ClashON_Lucas",
-    "Steak", "Epic Lucky Block", "Roblox", "Legendary Lucky Block",
-    -- Extras comuns
-    "Sign", "Bat", "mateus", "edgar", "DEV",
-    "TungTungTung", "Sahur", "BombardiroCrocodilo", "TrippiTroppi",
-    "LiriliLarila", "BonecaAmbalabu", "ChimpanziniBananini", "FrulliFrulla",
-    "GlorboFruttodrillo", "GangsterFootera", "CavalloVirtuoso", "PipiPoipoi",
-    "BrrBrrPatapim", "TrulimeroTrulicina", "Tralaledon", "PandacciniBananini",
-    "BobrittoBandito", "PenguinoCocoso", "TigrinhoTatata", "CocofantoElefanto",
-    "GirafaCelestre", "RalcalaCacaus", "BombombiniGusini", "CappuccinoAssassino",
-    "Matteo", "Spaghettini", "Lasagna", "Tortellino", "Macaroni",
-    "Burger", "Pizza", "Taco", "HotDog", "Sushi",
-    "Cat", "Dog", "Rat", "Frog", "Duck",
-    "NoobClassic", "Guest1337", "Builderman", "Stickmasterluke", "Shedletsky",
-    "Roblox", "ROBLOX", "Brick", "Stud", "Trowel",
-    "Sigma", "Skibbidi", "Gyatt", "Rizz", "Fanum", "Ohio", "Mewing", "Looksmax",
-    "Meme", "Gigachad", "Chad", "Soyjak", "Wojak", "NPC", "TouchGrass",
-}
-
--- Organiza em botoes de 3 por linha
-local currentRow = nil
-for i, name in ipairs(Brainrots) do
-    if (i - 1) % 3 == 0 then
-        currentRow = Instance.new("Frame")
-        currentRow.Size = UDim2.new(1, 0, 0, 30)
-        currentRow.BackgroundTransparency = 1
-        currentRow.ZIndex = 9
-        currentRow.Parent = SpawnTab
-
-        local rowLayout = Instance.new("UIListLayout")
-        rowLayout.FillDirection = Enum.FillDirection.Horizontal
-        rowLayout.Padding = UDim.new(0, 4)
-        rowLayout.Parent = currentRow
+end, Colors.Success)
+CreateButton(SpawnTab, "Spawn Skibbidi", function()
+    if Remotes:FindFirstChild("SpawnThing") then
+        Remotes.SpawnThing:FireServer("Skibbidi", "Default", "Common")
+        notify("Spawn", "Skibbidi spawnado!", 2)
     end
-
-    local b = Instance.new("TextButton")
-    b.Size = UDim2.new(0.333, -3, 1, 0)
-    b.BackgroundColor3 = Colors.Element
-    b.BackgroundTransparency = 0.30
-    b.Text = name
-    b.TextColor3 = Colors.Text
-    b.TextSize = 9
-    b.Font = Enum.Font.GothamBold
-    b.BorderSizePixel = 0
-    b.AutoButtonColor = false
-    b.ZIndex = 10
-    b.TextTruncate = Enum.TextTruncate.AtEnd
-    b.Parent = currentRow
-    Corner(b, 4)
-
-    b.MouseButton1Click:Connect(function()
-        if Remotes:FindFirstChild("SpawnThing") then
-            Remotes.SpawnThing:FireServer(name, SelectedMutation, "Common")
-            notify("Spawn", name .. " (" .. SelectedMutation .. ")", 1)
-        end
-    end)
-end
-
-CreateSectionLabel(SpawnTab, "Spawn em RACE (Shiny)")
-CreateButton(SpawnTab, "Spawn RACE (qualquer brainrot)", function()
-    if Remotes:FindFirstChild("SpawnThingRace") then
-        local name = SpawnInput.Text ~= "" and SpawnInput.Text or "Noob"
-        Remotes.SpawnThingRace:FireServer(name, "Shiny")
-        notify("Race", "Race com " .. name .. " (Shiny)!", 2)
+end, Colors.Success)
+CreateButton(SpawnTab, "Spawn Roblox", function()
+    if Remotes:FindFirstChild("SpawnThing") then
+        Remotes.SpawnThing:FireServer("Roblox", "Default", "Common")
+        notify("Spawn", "Roblox spawnado!", 2)
     end
-end, Colors.Warning)
-CreateButton(SpawnTab, "Spawn RACE 10x em sequencia", function()
-    if Remotes:FindFirstChild("SpawnThingRace") then
-        local name = SpawnInput.Text ~= "" and SpawnInput.Text or "Noob"
-        for i = 1, 10 do
-            Remotes.SpawnThingRace:FireServer(name, "Shiny")
-            task.wait(0.15)
-        end
-        notify("Race", "10 races " .. name .. " Shiny!", 2)
-    end
-end, Colors.Warning)
+end, Colors.Success)
 
 -- ============================
 -- ABA: EVENTS
 -- ============================
-CreateSectionLabel(EventsTab, "Eventos do jogo")
+CreateSectionLabel(EventsTab, "Eventos")
 CreateButton(EventsTab, "Skip Evento Atual", function()
     if Remotes:FindFirstChild("Eventos") then
         Remotes.Eventos:FireServer("EventoAtual")
         notify("Eventos", "Evento skipado!", 2)
     end
 end, Colors.Success)
-CreateButton(EventsTab, "Evento Global", function()
-    if Remotes:FindFirstChild("EventosGlobal") then
-        Remotes.EventosGlobal:FireServer("EventoAtual")
-        notify("Eventos", "Evento global ativado!", 2)
-    end
-end, Colors.Success)
-CreateButton(EventsTab, "Skip 10x em sequencia", function()
+CreateButton(EventsTab, "Skip 10x", function()
     if Remotes:FindFirstChild("Eventos") then
         for i = 1, 10 do
             Remotes.Eventos:FireServer("EventoAtual")
@@ -976,191 +540,27 @@ CreateButton(EventsTab, "Skip 10x em sequencia", function()
     end
 end, Colors.Success)
 
-CreateSectionLabel(EventsTab, "Tsunami")
-CreateButton(EventsTab, "Tsunami Rain (Tsunami1)", function()
-    if Remotes:FindFirstChild("TsunamiRain") then
-        Remotes.TsunamiRain:FireServer("Tsunami1")
-        notify("Tsunami", "Tsunami1 iniciado!", 2)
-    end
-end, Colors.Warning)
-CreateButton(EventsTab, "Limpar Tsunami", function()
-    if Remotes:FindFirstChild("TsunamiClear") then
-        Remotes.TsunamiClear:FireServer()
-        notify("Tsunami", "Tsunamis limpos!", 2)
-    end
-end, Colors.Success)
-
--- ============================
--- ABA: ROLETAS
--- ============================
-CreateSectionLabel(RoletaTab, "Bypass de Roleta (resultado vem do client)")
-CreateInfoLabel(RoletaTab, "O jogo confia no cliente pra dizer o resultado da roleta", Colors.Warning)
-
-CreateAmountInput(RoletaTab, "Tipo (1=dinheiro, 2=xp, 3=moedas)", 2, function(v)
-    if Remotes:FindFirstChild("AcabouRoleta") then
-        Remotes.AcabouRoleta:FireServer(v)
-        notify("Roleta", "Tipo " .. tostring(v) .. " aplicado!", 2)
-    end
-end)
-CreateButton(RoletaTab, "Rolar dinheiro (tipo 2)", function()
-    if Remotes:FindFirstChild("AcabouRoleta") then
-        Remotes.AcabouRoleta:FireServer(2)
-        notify("Roleta", "Roleta dinheiro!", 2)
-    end
-end, Colors.Gold)
-CreateButton(RoletaTab, "Rolar moedas (tipo 3)", function()
-    if Remotes:FindFirstChild("AcabouRoleta") then
-        Remotes.AcabouRoleta:FireServer(3)
-        notify("Roleta", "Roleta moedas!", 2)
-    end
-end, Colors.Gold)
-CreateButton(RoletaTab, "Rolar 10x", function()
-    if Remotes:FindFirstChild("AcabouRoleta") then
-        for i = 1, 10 do
-            Remotes.AcabouRoleta:FireServer(2)
-            task.wait(0.1)
-        end
-        notify("Roleta", "10x roleta!", 2)
-    end
-end, Colors.Gold)
-
 -- ============================
 -- ABA: ADMIN
 -- ============================
-CreateSectionLabel(AdminTab, "Funcoes de Admin (server valida? nao kkk)")
-
+CreateSectionLabel(AdminTab, "Admin Functions")
 CreateButton(AdminTab, "Anuncio Global", function()
     if Remotes:FindFirstChild("AnnouncementGlobal") then
-        Remotes.AnnouncementGlobal:FireServer("[ADMIN] " .. LocalPlayer.Name .. " domina o server!")
-        notify("Admin", "Anuncio global enviado!", 2)
+        Remotes.AnnouncementGlobal:FireServer("[ADMIN] " .. LocalPlayer.Name .. " toma conta!")
+        notify("Admin", "Anuncio enviado!", 2)
     end
 end, Colors.Warning)
-CreateButton(AdminTab, "Poll Global (10s)", function()
-    if Remotes:FindFirstChild("Polls") then
-        Remotes.Polls:FireServer("Quem eh o melhor?", LocalPlayer.Name, "Outros", 10, "Global")
-        notify("Admin", "Poll criado!", 2)
-    end
-end, Colors.Warning)
-
-CreateSectionLabel(AdminTab, "Countdown")
-CreateAmountInput(AdminTab, "Segundos do countdown", 60, function(v)
-    if Remotes:FindFirstChild("Countdown") then
-        Remotes.Countdown:FireServer("Countdown custom", v, true)
-        notify("Countdown", tostring(v) .. " segundos", 2)
-    end
-end)
-CreateButton(AdminTab, "Countdown 60s (urgente)", function()
-    if Remotes:FindFirstChild("Countdown") then
-        Remotes.Countdown:FireServer("Servidor fechando em...", 60, true)
-        notify("Countdown", "60s", 2)
-    end
-end, Colors.Danger)
-CreateButton(AdminTab, "Countdown 10s (critico)", function()
-    if Remotes:FindFirstChild("Countdown") then
-        Remotes.Countdown:FireServer("ALERTA CRITICO", 10, true)
-        notify("Countdown", "10s critico", 2)
-    end
-end, Colors.Danger)
-
-CreateSectionLabel(AdminTab, "DESTRUIDORES (use com cuidado)")
-CreateButton(AdminTab, "SHUTDOWN SERVER", function()
-    if Remotes:FindFirstChild("Shutdown") then
-        Remotes.Shutdown:FireServer()
-        notify("SHUTDOWN", "Comando enviado!", 2)
-    end
-end, Colors.Danger)
-CreateInfoLabel(AdminTab, "AVISO: Shutdown pode derrubar o server inteiro", Colors.Danger)
 
 -- ============================
 -- ABA: MISC
 -- ============================
-CreateSectionLabel(MiscTab, "VIP / Premium")
-CreateAmountInput(MiscTab, "User ID (VIP)", 1687267215, function(v)
-    if Remotes:FindFirstChild("ConferirVip") then
-        Remotes.ConferirVip:FireServer(v)
-        notify("VIP", "User " .. tostring(v) .. " virou VIP!", 2)
-    end
-end)
-CreateButton(MiscTab, "Dar VIP pra voce mesmo", function()
-    if Remotes:FindFirstChild("ConferirVip") then
-        Remotes.ConferirVip:FireServer(LocalPlayer.UserId)
-        notify("VIP", "Voce virou VIP!", 2)
-    end
-end, Colors.Gold)
-CreateButton(MiscTab, "Dar VIP pra todos online", function()
-    if Remotes:FindFirstChild("ConferirVip") then
-        for _, p in pairs(Players:GetPlayers()) do
-            Remotes.ConferirVip:FireServer(p.UserId)
-            task.wait(0.05)
-        end
-        notify("VIP", "Todos online viraram VIP!", 2)
-    end
-end, Colors.Gold)
-
-CreateSectionLabel(MiscTab, "Lucky Block")
-CreateButton(MiscTab, "Lucky Block (tool equipado)", function()
-    if Remotes:FindFirstChild("LuckyBlock") then
-        local t = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool")
-        if t then
-            Remotes.LuckyBlock:FireServer(t)
-            notify("Lucky Block", "Tentou abrir " .. t.Name, 2)
-        else
-            notify("Erro", "Equipe um brainrot primeiro", 2)
-        end
-    end
-end, Colors.Warning)
-CreateButton(MiscTab, "Lucky Block 10x", function()
-    if Remotes:FindFirstChild("LuckyBlock") then
-        local t = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool")
-        if t then
-            for i = 1, 10 do
-                Remotes.LuckyBlock:FireServer(t)
-                task.wait(0.1)
-            end
-            notify("Lucky Block", "10x " .. t.Name, 2)
-        end
-    end
-end, Colors.Warning)
-
 CreateSectionLabel(MiscTab, "Sobre")
-CreateInfoLabel(MiscTab, "Brainrot Hub v1.0", Colors.Accent)
-CreateInfoLabel(MiscTab, "by Mavis  -  8 abas, scroll, inputs custom", Colors.TextDim)
-CreateInfoLabel(MiscTab, "Bola minimizar ID: rbxassetid://10747372973", Colors.TextDim)
-
-CreateSectionLabel(MiscTab, "UI")
-CreateButton(MiscTab, "Mostrar/Ocultar Bola", function()
-    MinimizeBall.Visible = not MinimizeBall.Visible
-end)
-CreateSecondaryButton(MiscTab, "Resetar Posicao Hub", function()
+CreateButton(MiscTab, "Resetar Posicao", function()
     MainFrame.Position = UDim2.new(0.5, -350, 0.5, -240)
-end)
-CreateSecondaryButton(MiscTab, "Destruir Hub", function()
+end, Colors.Element)
+CreateButton(MiscTab, "Fechar Hub", function()
     ScreenGui:Destroy()
-end)
+end, Colors.Danger)
 
--- ============================
--- SCROLL POR TECLADO
--- ============================
-UserInputService.InputBegan:Connect(function(input, processed)
-    if processed then return end
-    if input.UserInputType ~= Enum.UserInputType.Keyboard then return end
-    local keyName = input.KeyCode.Name
-
-    if CurrentTab and Tabs[CurrentTab] then
-        local tab = Tabs[CurrentTab]
-        if keyName == "Up" then tab.ScrollBy(-40)
-        elseif keyName == "Down" then tab.ScrollBy(40)
-        elseif keyName == "PageUp" then tab.ScrollBy(-200)
-        elseif keyName == "PageDown" then tab.ScrollBy(200)
-        elseif keyName == "Home" then
-            tab.Content.CanvasPosition = Vector2.new(0, 0)
-        elseif keyName == "End" then
-            local max = math.max(0, tab.Content.AbsoluteCanvasSize.Y - tab.Content.AbsoluteSize.Y)
-            tab.Content.CanvasPosition = Vector2.new(0, max)
-        end
-    end
-end)
-
-notify("Brainrot Hub v1.0", "Carregado! 8 abas, scroll, inputs custom. by Mavis", 4)
-print("[BrainrotHub v1.0] Carregado! Bola minimizar: rbxassetid://10747372973")
-print("[BrainrotHub v1.0] Remotes usados: UpdateLeaderstatsAdicionar, UpdateLeaderstats, UpgradeBuy, Rebirth, SpawnThing, SpawnThingRace, AcabouRoleta, Eventos, etc")
+notify("Brainrot Hub v1.0", "Carregado! 6 abas com funcoes principais", 4)
+print("[BrainrotHub v1.0] Carregado com sucesso!")
